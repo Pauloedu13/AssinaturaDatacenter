@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assinatura Digital</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-image: url('https://i.imgur.com/2289TnJ.png'); /* Fundo via Imgur */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
+    .assinatura-container {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    canvas {
+      border: 1px solid #000;
+      background-color: #fff;
+      touch-action: none;
+      margin-bottom: 15px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+
+    #assinatura-img {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="assinatura-container">
+    <h2>Assine abaixo</h2>
+    <canvas id="canvas" width="400" height="200"></canvas><br />
+    <button onclick="limparAssinatura()">Limpar</button>
+    <button onclick="salvarAssinatura()">Baixar Assinatura</button>
+    <div>
+      <img id="assinatura-img" alt="Prévia da assinatura" />
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let desenhando = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+      desenhando = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (desenhando) {
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      desenhando = false;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      desenhando = true;
+      const touch = e.touches[0];
+      const pos = getTouchPos(touch);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (desenhando) {
+        const touch = e.touches[0];
+        const pos = getTouchPos(touch);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      desenhando = false;
+    });
+
+    function getTouchPos(touch) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      };
+    }
+
+    function limparAssinatura() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('assinatura-img').src = '';
+    }
+
+    function salvarAssinatura() {
+      const imagem = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = 'assinatura.png';
+      link.href = imagem;
+      link.click();
+      document.getElementById('assinatura-img').src = imagem;
+    }
+  </script>
+</body>
+</html>
